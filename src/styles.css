@@ -1,0 +1,175 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Portal Câmara Municipal de Couto de Magalhães de Minas
+ * Paleta institucional: verde mata atlântica + dourado heráldico
+ */
+
+@theme inline {
+  --font-display: "Merriweather", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-deep: var(--primary-deep);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-topbar: var(--topbar);
+  --color-topbar-foreground: var(--topbar-foreground);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.99 0.005 110);
+  --foreground: oklch(0.18 0.02 160);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 160);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 160);
+
+  /* Verde institucional Mata Atlântica */
+  --primary: oklch(0.38 0.09 155);
+  --primary-foreground: oklch(0.98 0.01 110);
+  --primary-deep: oklch(0.28 0.07 155);
+
+  --secondary: oklch(0.95 0.02 140);
+  --secondary-foreground: oklch(0.28 0.07 155);
+
+  --muted: oklch(0.96 0.01 140);
+  --muted-foreground: oklch(0.45 0.02 160);
+
+  --accent: oklch(0.93 0.04 145);
+  --accent-foreground: oklch(0.28 0.07 155);
+
+  /* Dourado heráldico */
+  --gold: oklch(0.78 0.14 85);
+  --gold-foreground: oklch(0.22 0.05 70);
+
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: oklch(0.98 0.01 110);
+
+  --border: oklch(0.9 0.015 140);
+  --input: oklch(0.92 0.015 140);
+  --ring: oklch(0.38 0.09 155);
+
+  --topbar: oklch(0.22 0.05 155);
+  --topbar-foreground: oklch(0.95 0.02 110);
+
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(0.28 0.07 155 / 0.92),
+    oklch(0.38 0.09 155 / 0.7) 60%,
+    oklch(0.78 0.14 85 / 0.35)
+  );
+  --gradient-card: linear-gradient(
+    160deg,
+    oklch(0.98 0.01 140) 0%,
+    oklch(0.94 0.03 145) 100%
+  );
+  --shadow-elegant: 0 10px 30px -12px oklch(0.28 0.07 155 / 0.35);
+  --shadow-card: 0 4px 14px -6px oklch(0.28 0.07 155 / 0.18);
+}
+
+.dark {
+  --background: oklch(0.16 0.02 160);
+  --foreground: oklch(0.96 0.01 110);
+  --card: oklch(0.22 0.03 160);
+  --card-foreground: oklch(0.96 0.01 110);
+  --popover: oklch(0.22 0.03 160);
+  --popover-foreground: oklch(0.96 0.01 110);
+  --primary: oklch(0.65 0.12 150);
+  --primary-foreground: oklch(0.16 0.02 160);
+  --primary-deep: oklch(0.45 0.09 155);
+  --secondary: oklch(0.28 0.04 160);
+  --secondary-foreground: oklch(0.96 0.01 110);
+  --muted: oklch(0.28 0.04 160);
+  --muted-foreground: oklch(0.75 0.02 140);
+  --accent: oklch(0.32 0.05 155);
+  --accent-foreground: oklch(0.96 0.01 110);
+  --gold: oklch(0.78 0.14 85);
+  --gold-foreground: oklch(0.16 0.02 160);
+  --destructive: oklch(0.65 0.2 27);
+  --destructive-foreground: oklch(0.96 0.01 110);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.65 0.12 150);
+  --topbar: oklch(0.12 0.02 160);
+  --topbar-foreground: oklch(0.92 0.02 110);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    font-family: var(--font-sans);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .container-portal {
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .container-portal { padding-inline: 2rem; }
+  }
+}
+
+/* Acessibilidade */
+html[data-font="lg"] { font-size: 112.5%; }
+html[data-font="xl"] { font-size: 125%; }
+html[data-contrast="high"] {
+  --background: 0 0% 0%;
+  --foreground: 60 100% 50%;
+  --card: 0 0% 0%;
+  --card-foreground: 60 100% 50%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 60 100% 80%;
+  --border: 60 100% 50%;
+  --primary: 60 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --primary-deep: 60 100% 40%;
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 60 100% 50%;
+  --gold: 60 100% 50%;
+  --gold-foreground: 0 0% 0%;
+}
+html[data-contrast="high"] img { filter: grayscale(1) contrast(1.2); }
+

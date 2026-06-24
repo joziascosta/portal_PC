@@ -1,0 +1,86 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { Plus, Trash2, Pencil, X } from "lucide-react";
+import { FileUpload } from "@/components/admin/FileUpload";
+
+export const Route = createFileRoute("/_authenticated/admin/projetos")({ component: AdminProjetos });
+
+const empty = { numero: "", ano: new Date().getFullYear(), autor: "", ementa: "", status: "em_tramitacao", arquivo_url: "", data_apresentacao: "" };
+
+function AdminProjetos() {
+  const qc = useQueryClient();
+  const [form, setForm] = useState(empty);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const { data = [] } = useQuery({
+    queryKey: ["admin-projetos"],
+    queryFn: async () => (await supabase.from("projetos_lei").select("*").order("ano", { ascending: false }).order("numero", { ascending: false })).data ?? [],
+  });
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const payload = { ...form, autor: form.autor || null, arquivo_url: form.arquivo_url || null, data_apresentacao: form.data_apresentacao || null };
+      const { error } = editingId
+        ? await supabase.from("projetos_lei").update(payload).eq("id", editingId)
+        : await supabase.from("projetos_lei").insert(payload);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-projetos"] }); qc.invalidateQueries({ queryKey: ["projetos"] }); setForm(empty); setEditingId(null); },
+  });
+
+  const del = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from("projetos_lei").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-projetos"] }),
+  });
+
+  function startEdit(p: any) {
+    setEditingId(p.id);
+    setForm({ numero: p.numero, ano: p.ano, autor: p.autor ?? "", ementa: p.ementa, status: p.status, arquivo_url: p.arquivo_url ?? "", data_apresentacao: p.data_apresentacao ?? "" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  return (
+    <div className="p-8 max-w-6xl space-y-8">
+      <div><h1 className="font-display text-3xl font-bold text-primary-deep">Projetos de Lei</h1><p className="text-muted-foreground mt-1">Cadastre projetos em tramitação e aprovados.</p></div>
+      <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="bg-card border border-border rounded-xl p-6 space-y-4 shadow-[var(--shadow-card)]">
+        <h2 className="font-display text-lg font-bold text-primary-deep flex items-center gap-2"><Plus className="h-4 w-4" /> {editingId ? "Editar projeto" : "Novo projeto"}</h2>
+        <div className="grid md:grid-cols-4 gap-4">
+          <div><label className="text-sm font-medium">Número</label><input required value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} className="mt-1 w-full bg-muted rounded-md px-3 py-2" /></div>
+          <div><label className="text-sm font-medium">Ano</label><input type="number" required value={form.ano} onChange={(e) => setForm({ ...form, ano: Number(e.target.value) })} className="mt-1 w-full bg-muted rounded-md px-3 py-2" /></div>
+          <div><label className="text-sm font-medium">Data apresentação</label><input type="date" value={form.data_apresentacao} onChange={(e) => setForm({ ...form, data_apresentacao: e.target.value })} className="mt-1 w-full bg-muted rounded-md px-3 py-2" /></div>
+          <div><label className="text-sm font-medium">Status</label>
+            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="mt-1 w-full bg-muted rounded-md px-3 py-2">
+              <option value="em_tramitacao">Em tramitação</option><option value="aprovado">Aprovado</option><option value="rejeitado">Rejeitado</option><option value="arquivado">Arquivado</option>
+            </select></div>
+        </div>
+        <div><label className="text-sm font-medium">Autor</label><input value={form.autor} onChange={(e) => setForm({ ...form, autor: e.target.value })} className="mt-1 w-full bg-muted rounded-md px-3 py-2" /></div>
+        <div><label className="text-sm font-medium">Ementa</label><textarea required rows={3} value={form.ementa} onChange={(e) => setForm({ ...form, ementa: e.target.value })} className="mt-1 w-full bg-muted rounded-md px-3 py-2" /></div>
+        <FileUpload label="Arquivo (PDF)" folder="projetos" accept="application/pdf" value={form.arquivo_url} onChange={(url) => setForm({ ...form, arquivo_url: url })} />
+        {save.error && <p className="text-sm text-destructive">{(save.error as Error).message}</p>}
+        <div className="flex gap-2">
+          <button disabled={save.isPending} type="submit" className="bg-primary text-primary-foreground px-5 py-2 rounded-md text-sm font-semibold hover:bg-primary-deep transition disabled:opacity-60">{save.isPending ? "Salvando..." : editingId ? "Salvar alterações" : "Adicionar"}</button>
+          {editingId && <button type="button" onClick={() => { setEditingId(null); setForm(empty); }} className="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm border border-border"><X className="h-3 w-3" /> Cancelar</button>}
+        </div>
+      </form>
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-secondary/60 text-primary-deep"><tr><th className="text-left p-3">Nº/Ano</th><th className="text-left p-3">Ementa</th><th className="text-left p-3">Autor</th><th className="text-left p-3">Status</th><th className="text-right p-3">Ações</th></tr></thead>
+          <tbody>
+            {data.map((p: any) => (
+              <tr key={p.id} className="border-t border-border">
+                <td className="p-3 font-medium">{p.numero}/{p.ano}</td><td className="p-3 max-w-md truncate">{p.ementa}</td><td className="p-3">{p.autor || "—"}</td><td className="p-3">{p.status}</td>
+                <td className="p-3 text-right space-x-2">
+                  <button onClick={() => startEdit(p)} className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border border-border hover:bg-muted"><Pencil className="h-3 w-3" /> Editar</button>
+                  <button onClick={() => confirm("Excluir?") && del.mutate(p.id)} className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border border-destructive/40 text-destructive hover:bg-destructive/10"><Trash2 className="h-3 w-3" /> Excluir</button>
+                </td>
+              </tr>
+            ))}
+            {data.length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Nenhum projeto cadastrado.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
